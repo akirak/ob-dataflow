@@ -72,7 +72,6 @@ For a list of supported arguments, see
 
 (cl-defun ob-dataflow--dfd-commandline (&key in-file)
   "Return a command line for producing dot from IN-FILE."
-  (check-type in-file string)
   (mapconcat #'shell-quote-argument
              `(,dataflow-diagram-executable
                "dfd"
@@ -81,7 +80,6 @@ For a list of supported arguments, see
 
 (cl-defun ob-dataflow--dot-commandline (&key out-file)
   "Return a command line for producing an image to OUT-FILE."
-  (check-type out-file string)
   (let ((type (file-name-extension out-file)))
     (mapconcat #'shell-quote-argument
                `(,ob-dataflow-dot-executable
