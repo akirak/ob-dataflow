@@ -1,0 +1,88 @@
+* ob-dataflow
+This package lets you write dataflow diagrams in the syntax of [[https://github.com/sonyxperiadev/dataflow][dataflow]] with Org Babel.
+It depends on =dataflow= and GraphViz =dot= to produce images from plain text.
+** Features
+At present, this library only supports dataflow diagrams (DFD).
+Dataflow itself supports dataflow diagrams and sequence diagrams, but the latter is not supported yet. You can use PlantUML for that task, and there is [[https://plantuml.com/emacs][a built-in support]] for Org Babel.
+** Installation
+To use this package, you have to install the following stuffs:
+
+- [[https://github.com/akirak/dataflow-diagram-mode][dataflow-diagram-mode]], which is not on MELPA yet
+- [[https://github.com/sonyxperiadev/dataflow][dataflow]] executable
+- =dot= executable of [[https://graphviz.org/download/][GraphViz]] for producing the final image
+
+GraphViz is available for most popular Linux distributions.
+
+Dataflow is less common, and it is written in Haskell.
+I have packaged the program in Nix which is available in [[https://github.com/akirak/dataflow][my forked repository]], so you can install it using Nix:
+
+#+begin_src sh
+  git clone -b nix-flake https://github.com/akirak/dataflow.git
+  cd dataflow
+  nix-env -if .
+#+end_src
+
+Alternatively, you can add =github:akirak/dataflow/nix-flake= to your flake and use the default package of the flake. For details, see the documentation of [[https://nixos.wiki/wiki/Flakes][Nix flakes]].
+** Usage
+The following is an example source block:
+
+#+begin_src org
+  ,#+begin_src dataflow :file "dfd-example.png"
+    diagram {
+      title = "Webapp"
+    
+      /* Some comment about this... */
+      threats = `
+    No particular threats at this point.
+    
+                                       It's **extremely** safe.`
+    
+      boundary browser {
+        title = "Browser"
+    
+        function client {
+          title = "Client"
+        }
+      }
+    
+      boundary aws {
+        title = "Amazon AWS"
+    
+        function server {
+          title = "Web Server"
+        }
+        database logs {
+          title = "Logs"
+        }
+      }
+      io analytics {
+        title = "Google Analytics"
+      }
+    
+      client -> server {
+        operation = "Request /"
+        description = `User navigates with a browser to see some content.`
+      }
+      server -> logs {
+        operation = "Log"
+        data = `The user
+    IP address.`
+        description = `Logged to a ELK stack.`
+      }
+      server -> client {
+        operation = "Response"
+        data = "User Profile"
+        description = `The server responds with some HTML.`
+      }
+      analytics <- client {
+        operation = "Log"
+        data = "Page Navigation"
+        description = `The Google Analytics plugin sends navigation
+    data to Google.`
+      }
+    }
+  ,#+end_src
+#+end_src
+
+You can customize the output by setting =ob-dataflow-dot-arguments=.
+For a list of supported options, see [[https://graphviz.org/doc/info/command.html][the documentation of GraphViz]].
